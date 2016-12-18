@@ -1,5 +1,8 @@
 import React, {PropTypes} from 'react';
 import solid from 'solid-client';
+import rdf from 'rdflib';
+
+const vocab = solid.vocab;
 
 export default class Posts extends React.Component {
   state = {
@@ -7,29 +10,50 @@ export default class Posts extends React.Component {
   }
 
   componentDidMount() {
-    const { webId, folder } = this.props;
-    solid.web.get(`${webId}/${folder}`)
-      .then(response => {
-        const graph = response.parsedGraph();
-        debugger;
-        // TODO: Implement the post reading logic
+    const { baseUrl, container } = this.props;
+    solid.web.get(`${baseUrl}/${container}`)
+      .then(container => {
+        return Promise.all(
+          container.contentsUris.map(uri => solid.web.get(uri))
+        );
       })
+      .then(posts => {
+        return posts.map(post => {
+          const graph = post.parsedGraph();
+          const url = rdf.sym(post.url);
+          const title = graph.any(url, vocab.dct('title'));
+          const content = graph.any(url, vocab.sioc('content'));
+
+          return {
+            title: title.value,
+            content: content.value,
+          };
+        });
+      })
+      .then(collection => {
+        this.setState({ collection });
+      });
   }
 
   render() {
     return (
       <div>
-        Posts go here
+        {this.state.collection.map(post =>
+          <div>
+            <h1>{post.title}</h1>
+            <p>{post.content}</p>
+          </div>
+        )}
       </div>
     );
   }
 }
 
 Posts.propTypes = {
-  webId: PropTypes.string,
-  folder: PropTypes.string,
+  baseUrl: PropTypes.string,
+  container: PropTypes.string,
 };
 
 Posts.defaultProps = {
-  folder: 'Posts',
+  container: 'Posts',
 };

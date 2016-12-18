@@ -3,8 +3,10 @@ import logo from './logo.svg';
 import solid from 'solid-client';
 import './App.css';
 import CreatePost from './components/CreatePost';
+import Posts from './components/Posts';
 
 const ns = solid.vocab;
+const DEFAULT_CONTAINER = 'Posts';
 
 class App extends Component {
   state = {
@@ -12,14 +14,58 @@ class App extends Component {
     errors: '',
   };
 
-  handleLogin = () => {
-    const solidUserUrl = this.urlInput.value || 'mpowered.databox.me';
+  updateStatus = (status, payload) => {
+    this.setState({ status }, () => {
+      console.log(status, payload);
+    });
+  }
 
-    solid.login(`https://${solidUserUrl}`)
+  handleLogin = () => {
+    const inputValue = this.urlInput.value;
+    const solidUserUrl = inputValue ? `https://${inputValue}` : 'https://mpowered.databox.me';
+
+    solid.login(solidUserUrl)
       .then(solid.getProfile)
       .then(profile => {
+        this.updateStatus('Profile loaded', profile);
+        return profile.loadAppRegistry();
+      })
+      .then(profile => {
+        const registrationResults = profile.appsForType(ns.sioc('MarkdownBlog'));
+        if (registrationResults.length) { return profile; }
+        else {
+          this.updateStatus('App is not registered, registering');
+          const options = {
+            name: 'Markdown Blog',
+            shortdesc: 'A Solid backed markdown blog',
+            redirectTemplateUri: 'https://localhost:3000',
+          };
+          const typesForApp = [ ns.sioc('MarkdownBlog'), ns.dct('MarkdownBlog') ];
+          const isListed = true;
+          const app = new solid.AppRegistration(options, typesForApp, isListed);
+          return profile.registerApp(app);
+        }
+      })
+      .then(profile => {
+        this.updateStatus('App registered, checking for container', profile);
+        return solid.web.get(`${solidUserUrl}/${DEFAULT_CONTAINER}/`)
+          .then(response => {
+            return profile;
+          })
+          .catch(e => {
+            this.updateStatus('Container does not exist, creating');
+            return solid.web.createContainer(solidUserUrl, DEFAULT_CONTAINER)
+              .then(containerResponse => {
+                debugger;
+                return profile;
+              });
+          });
+      })
+      .then(profile => {
+        this.updateStatus('App initialization complete!');
         this.setState({
           currentProfile: profile,
+          solidUserUrl,
         });
       })
       .catch(e => {
@@ -68,7 +114,16 @@ class App extends Component {
           </div>
         }
         {this.state.currentProfile &&
-          <CreatePost webId={this.state.currentProfile.webId} />
+          <div>
+            <CreatePost
+              baseUrl={this.state.solidUserUrl}
+              container={DEFAULT_CONTAINER}
+            />
+            <Posts
+              baseUrl={this.state.solidUserUrl}
+              container={DEFAULT_CONTAINER}
+            />
+          </div>
         }
       </div>
     );
