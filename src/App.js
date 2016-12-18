@@ -21,23 +21,20 @@ class App extends Component {
         return profile.loadAppRegistry();
       })
       .then(profile => {
-        debugger;
-        profile.appsForType(ns.sioc('MarkdownBlog'))
-        .then(registrationResults => {
-          if (registrationResults.length) {
-            return profile;
-          } else {
-            const options = {
-              name: 'Markdown Blog',
-              shortdesc: 'A Solid backed markdown blog',
-              redirectTemplateUri: 'https://localhost:3000',
-            };
-            const typesForApp = [ ns.sioc('MarkdownBlog'), ns.dct('MarkdownBlog') ];
-            const isListed = true;
-            const app = new solid.AppRegistration(options, typesForApp, isListed);
-            return profile.registerApp(app);
-          }
-        });
+        const registrationResults = profile.appsForType(ns.sioc('MarkdownBlog'))
+        if (registrationResults.length) {
+          return profile;
+        } else {
+          const options = {
+            name: 'Markdown Blog',
+            shortdesc: 'A Solid backed markdown blog',
+            redirectTemplateUri: 'https://localhost:3000',
+          };
+          const typesForApp = [ ns.sioc('MarkdownBlog'), ns.dct('MarkdownBlog') ];
+          const isListed = true;
+          const app = new solid.AppRegistration(options, typesForApp, isListed);
+          return profile.registerApp(app);
+        }
       })
       .then(profile => {
         this.setState({
