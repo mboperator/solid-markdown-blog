@@ -6,6 +6,7 @@ const vocab = solid.vocab;
 
 export default class CreatePost extends React.Component {
   createPost = () => {
+    const { container, baseUrl } = this.props;
     const title = this.titleInput.value;
     const content = this.contentInput.value;
 
@@ -19,9 +20,12 @@ export default class CreatePost extends React.Component {
 
     const data = new rdf.Serializer(graph).toN3(graph);
 
-    solid.web.post(`/${this.props.container}`, data)
-      .then(meta => {
-        debugger;
+    solid.web.post(`${baseUrl}/${container}`, data, title)
+      .then(response => {
+        console.log(response);
+      })
+      .catch(err => {
+        console.log(err);
       });
   }
 

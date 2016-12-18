@@ -7,8 +7,8 @@ export default class Posts extends React.Component {
   }
 
   componentDidMount() {
-    const { webId, container } = this.props;
-    solid.web.get(`${webId}/${container}`)
+    const { solidUserUrl, container } = this.props;
+    solid.web.get(`${solidUserUrl}/${container}`)
       .then(response => {
         const graph = response.parsedGraph();
         debugger;
@@ -26,7 +26,7 @@ export default class Posts extends React.Component {
 }
 
 Posts.propTypes = {
-  webId: PropTypes.string,
+  solidUserUrl: PropTypes.string,
   container: PropTypes.string,
 };
 

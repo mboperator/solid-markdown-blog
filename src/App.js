@@ -30,7 +30,7 @@ class App extends Component {
         return profile.loadAppRegistry();
       })
       .then(profile => {
-        const registrationResults = profile.appsForType(ns.sioc('MarkdownBlog'))
+        const registrationResults = profile.appsForType(ns.sioc('MarkdownBlog'));
         if (registrationResults.length) { return profile; }
         else {
           this.updateStatus('App is not registered, registering');
@@ -64,6 +64,7 @@ class App extends Component {
         this.updateStatus('App initialization complete!');
         this.setState({
           currentProfile: profile,
+          solidUserUrl,
         });
       })
       .catch(e => {
@@ -112,7 +113,10 @@ class App extends Component {
           </div>
         }
         {this.state.currentProfile &&
-          <CreatePost webId={this.state.currentProfile.webId} />
+          <CreatePost
+            baseUrl={this.state.solidUserUrl}
+            container={DEFAULT_CONTAINER}
+          />
         }
       </div>
     );
