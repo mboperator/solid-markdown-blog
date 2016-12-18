@@ -4311,7 +4311,7 @@ rdf-ns@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/rdf-ns/-/rdf-ns-0.1.0.tgz#38ac32bb48b3c9dcae9534c85ab4864408bdd816"
 
-rdflib@^0.12.1:
+rdflib, rdflib@^0.12.1:
   version "0.12.3"
   resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-0.12.3.tgz#2b42066a6609c06b40a90485849362c7cb95ea1e"
   dependencies:
