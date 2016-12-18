@@ -24,7 +24,6 @@ export default class Posts extends React.Component {
           const title = graph.any(url, vocab.dct('title'));
           const content = graph.any(url, vocab.sioc('content'));
 
-          debugger;
           return {
             title: title.value,
             content: content.value,
@@ -33,7 +32,7 @@ export default class Posts extends React.Component {
       })
       .then(collection => {
         this.setState({ collection });
-      })
+      });
   }
 
   render() {
