@@ -23,6 +23,8 @@ export default class CreatePost extends React.Component {
     solid.web.post(`${baseUrl}/${container}`, data, title)
       .then(response => {
         console.log(response);
+        this.titleInput.value = '';
+        this.contentInput.value = '';
       })
       .catch(err => {
         console.log(err);

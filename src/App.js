@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import solid from 'solid-client';
 import './App.css';
 import CreatePost from './components/CreatePost';
+import Posts from './components/Posts';
 
 const ns = solid.vocab;
 const DEFAULT_CONTAINER = 'Posts';
@@ -113,10 +114,16 @@ class App extends Component {
           </div>
         }
         {this.state.currentProfile &&
-          <CreatePost
-            baseUrl={this.state.solidUserUrl}
-            container={DEFAULT_CONTAINER}
-          />
+          <div>
+            <CreatePost
+              baseUrl={this.state.solidUserUrl}
+              container={DEFAULT_CONTAINER}
+            />
+            <Posts
+              baseUrl={this.state.solidUserUrl}
+              container={DEFAULT_CONTAINER}
+            />
+          </div>
         }
       </div>
     );
