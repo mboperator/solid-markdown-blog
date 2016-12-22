@@ -1,47 +1,15 @@
 import React, {PropTypes} from 'react';
-import solid from 'solid-client';
-import rdf from 'rdflib';
+import { connectModule } from 'redux-modules';
+import module from './module';
 
-const vocab = solid.vocab;
-
-export default class Posts extends React.Component {
-  state = {
-    collection: [],
-  }
-
-  componentDidMount() {
-    const { baseUrl, container } = this.props;
-    solid.web.get(`${baseUrl}/${container}`)
-      .then(container => {
-        return Promise.all(
-          container.contentsUris.map(uri => solid.web.get(uri))
-        );
-      })
-      .then(posts => {
-        return posts.map(post => {
-          const graph = post.parsedGraph();
-          const url = rdf.sym(post.url);
-          const title = graph.any(url, vocab.dct('title'));
-          const content = graph.any(url, vocab.sioc('content'));
-
-          return {
-            title: title.value,
-            content: content.value,
-          };
-        });
-      })
-      .then(collection => {
-        this.setState({ collection });
-      });
-  }
-
+class Posts extends React.Component {
   render() {
     return (
       <div>
-        {this.state.collection.map(post =>
+        {Object.keys(this.props.collection).map(key =>
           <div>
-            <h1>{post.title}</h1>
-            <p>{post.content}</p>
+            <h1>{this.props.collection[key].title}</h1>
+            <p>{this.props.collection[key].content}</p>
           </div>
         )}
       </div>
@@ -57,3 +25,5 @@ Posts.propTypes = {
 Posts.defaultProps = {
   container: 'Posts',
 };
+
+export default connectModule(module)(Posts);

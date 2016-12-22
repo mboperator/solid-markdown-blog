@@ -1,5 +1,6 @@
 import { createModule } from 'redux-modules';
 import { loop, liftState, Effects as Ef } from 'redux-loop';
+import postModule from '../Posts/module';
 
 import solid from 'solid-client';
 const ns = solid.vocab;
@@ -17,17 +18,24 @@ const module = createModule({
   initialState: {
     collection: '',
     webId: '',
-    profile: {},
+    profile: null,
     errors: [],
     status: '',
+    posts: {
+      collection: {},
+      container: '',
+      webId: '',
+    },
   },
   selector: state => state.markdownBlog,
   composes: [liftState],
   transformations: {
-    login: (state, { payload: webId }) => loop(
-      { ...state, webId, status: 'Logging in' },
+    setWebId: (state, { payload: webId }) =>
+      ({ ...state, webId }),
+    login: state => loop(
+      { ...state, status: 'Logging in' },
       Ef.promise(
-        () => solid.login(webId)
+        () => solid.login(`https://${state.webId}`)
           .then(solid.getProfile)
           .then(profile => profile.loadAppRegistry())
           .then(profile => {
@@ -45,8 +53,21 @@ const module = createModule({
           .catch(module.actions.networkError)
       )
     ),
+    signup: state => loop(
+      { ...state, status: 'Signing up' },
+      Ef.promise(
+        () => solid.signup().then(module.actions.setWebId)
+      )
+    ),
 
     loginSuccess: state => ({ ...state, status: '' }),
+    updatePosts: (state, { payload }) => {
+      const [nState, effects] = postModule(state.posts, payload);
+      return loop(
+        { ...state, posts: nState },
+        Ef.lift(effects, module.actions.updatePosts)
+      );
+    },
   },
 });
 
